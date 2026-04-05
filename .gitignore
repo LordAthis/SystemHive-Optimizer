@@ -8,5 +8,9 @@ ScanResults.json
 /TMP
 /Temp
 /temp
+/LOG
+/log
 
 
+# Log fájlok
+RescueCenter log
