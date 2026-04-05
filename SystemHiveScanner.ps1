@@ -1,7 +1,7 @@
 # ================================================
-# SystemHive Optimizer - SCANNER modul (tiszta v0.4)
-# Verzio: 0.4 - 2026.04.05
-# Támogatott OS: Windows 7 / 10 / 11
+# SystemHive Optimizer - SCANNER modul (kompatibilis v0.5)
+# Verzio: 0.5 - 2026.04.05
+# Kompatibilis: Windows PowerShell 5.1 (Win7/10/11)
 # ================================================
 
 # === AUTO ADMIN ELEVATION ===
@@ -58,9 +58,15 @@ foreach ($cat in $Categories) {
                 }
                 elseif ($cat.Name -eq "UninstallEntries") {
                     $displayName = $key.GetValue("DisplayName")
-                    $installLoc = $key.GetValue("InstallLocation") ?? $key.GetValue("UninstallString")
-                    if ($displayName -and $installLoc -and -not (Test-Path ($installLoc -replace '"','' -replace '%SystemRoot%', $env:SystemRoot))) {
-                        $issue = "Arva telepites: $displayName (hianyzo: $installLoc)"
+                    $installLoc = $key.GetValue("InstallLocation")
+                    if (-not $installLoc) { 
+                        $installLoc = $key.GetValue("UninstallString") 
+                    }
+                    if ($displayName -and $installLoc) {
+                        $cleanPath = ($installLoc -replace '"','' -replace '%SystemRoot%', $env:SystemRoot -replace '%ProgramFiles%', ${env:ProgramFiles})
+                        if (-not (Test-Path $cleanPath)) {
+                            $issue = "Arva telepites: $displayName (hianyzo: $installLoc)"
+                        }
                     }
                 }
                 elseif ($cat.Name -eq "Fonts" -and $valueData -and -not (Test-Path "$env:SystemRoot\Fonts\$valueData")) {
