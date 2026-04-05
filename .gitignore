@@ -1,0 +1,12 @@
+# Kihagyni való fájlok és mappák
+
+# Automatikusan az alkalmazások által létrehozott konfigurációs fájlok
+ScanResults.json
+
+
+# Ideíglenes fájlok tárolására használt mappák
+/TMP
+/Temp
+/temp
+
+
