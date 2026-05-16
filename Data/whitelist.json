@@ -1,0 +1,8 @@
+{
+  "Comments": "Ezeket a kulcsokat SOHA ne töröljük",
+  "ProtectedPaths": [
+    "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+    "HKLM\\SYSTEM\\CurrentControlSet\\Services",
+    "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders"
+  ]
+}
