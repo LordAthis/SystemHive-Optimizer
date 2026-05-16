@@ -1,0 +1,9 @@
+{
+  "Comments": "Extra mintak, amiket mindig jeloljunk problemasnak",
+  "Patterns": [
+    "*Temp*",
+    "*Crash*",
+    "*Old*",
+    "*Backup*"
+  ]
+}
