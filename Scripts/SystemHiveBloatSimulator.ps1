@@ -1,4 +1,8 @@
 # === RegHiveBloatSimulator.ps1 ===
+
+$ProjectTemp = Join-Path $PSScriptRoot "Temp"
+if (-not (Test-Path $ProjectTemp)) { New-Item -Path $ProjectTemp -ItemType Directory -Force }
+
 param([int]$Cycles = 50)  # hány „éves” telepítés/törlés szimuláljunk
 
 Write-Host "🚀 Registry bloat szimuláció indítása ($Cycles ciklus)..."
