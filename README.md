@@ -3,10 +3,10 @@ SystemHive Optimizer: Reristry Cleaning, and Defrag, File Cleaning, and defrag, 
 
 **Windows Registry tisztító és optimalizáló eszköz** – precíz, biztonságos és visszavonható módon.
 ---------------------------------------------
-Verzió: **0.5** (2026.05)
 FIGYELEM! FEJLESZTÉS ALATT, KIZÁRÓLAG SAJÁT FELELŐSSÉGRE HASZNÁLD!
 -------------------------------------------
 
+Verzió: **0.5** (2026.05)
 
 
 
