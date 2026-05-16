@@ -1,8 +1,9 @@
 # ================================================
-# SystemHive Optimizer - SCANNER modul
+# SystemHive Optimizer - SCANNER
 # Verzio: 0.5 - 2026.05
 # ================================================
 
+# === ADMIN ELEVATION ===
 function Test-Admin {
     $currentUser = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
     return $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -10,101 +11,97 @@ function Test-Admin {
 
 if (-not (Test-Admin)) {
     Write-Host "Rendszergazdai jogok szuksegesek. Ujrainditas admin modban..." -ForegroundColor Yellow
-    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
 
-# Temp mappa egységesítése (Launcher vagy local fallback)
-$Root = Split-Path -Parent $PSScriptRoot
+# === DUAL PATH KEZELES ===
+$ProjectName = "SystemHive-Optimizer"
+$InstalledPath = "C:\Windows\Scripts\$ProjectName"
+$LocalRoot = Split-Path -Parent $PSScriptRoot
+
+$Root = if (Test-Path $InstalledPath) { $InstalledPath } else { $LocalRoot }
 $TempDir = Join-Path $Root "Temp"
+
 if (-not (Test-Path $TempDir)) { 
     New-Item -Path $TempDir -ItemType Directory -Force | Out-Null 
 }
 
 $JsonFile = Join-Path $TempDir "ScanResults.json"
-$BackupHKLM = Join-Path $TempDir "Backup_HKLM.reg"
-$BackupHKCU = Join-Path $TempDir "Backup_HKCU.reg"
 
-Write-Host "SystemHive Optimizer - SCANNER inditasa..." -ForegroundColor Green
+Write-Host "SystemHive Optimizer - SCANNER (0.5) inditasa..." -ForegroundColor Green
+Write-Host "Munkakonyvtar: $Root" -ForegroundColor Gray
 
 # Registry backup
-reg export HKLM $BackupHKLM /y | Out-Null
-reg export HKCU $BackupHKCU /y | Out-Null
-Write-Host "Registry backup kesz -> Temp mappaba" -ForegroundColor Yellow
+reg export HKLM (Join-Path $TempDir "Backup_HKLM.reg") /y | Out-Null
+reg export HKCU (Join-Path $TempDir "Backup_HKCU.reg") /y | Out-Null
+Write-Host "Registry backup kesz." -ForegroundColor Yellow
 
-$Categories = @(
-    @{Name="ActiveX_COM_CLSID"; Desc="Arva ActiveX/COM/CLSID/TypeLib"; Paths=@("HKCR\CLSID","HKCR\TypeLib","HKLM\SOFTWARE\Classes","HKLM\SOFTWARE\Wow6432Node\Classes")}
-    @{Name="FileAssociations"; Desc="Hibas fajltipus-asszociaciok"; Paths=@("HKCR\.","HKCR\*\shell","HKLM\SOFTWARE\Classes")}
-    @{Name="UninstallEntries"; Desc="Arva telepitesi bejegyzesek"; Paths=@("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall","HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall","HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")}
-    @{Name="Fonts"; Desc="Hianyzo font fajlok"; Paths=@("HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts","HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts")}
-    @{Name="SharedDLLs"; Desc="Arva Shared DLL bejegyzesek"; Paths=@("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\SharedDLLs","HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\SharedDLLs")}
-    @{Name="History_MRU"; Desc="Elavult History / MRU"; Paths=@("HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs","HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32","HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU")}
-    @{Name="StartupPrograms"; Desc="Hianyzo startup exe"; Paths=@("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run","HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce","HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run","HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce")}
-    @{Name="ContextMenu_ShellEx"; Desc="Arva Context Menu / Shell Extension"; Paths=@("HKCR\*\shellex\ContextMenuHandlers","HKCR\Directory\shellex\ContextMenuHandlers","HKCR\Folder\shellex\ContextMenuHandlers")}
-)
-
+# .NET alapu registry scan
 $AllIssues = @()
 
-foreach ($cat in $Categories) {
-    $IssuesInCat = 0
-    Write-Host "Scanning $($cat.Name) ..." -NoNewline -ForegroundColor White
+$ScanCategories = @(
+    @{Name="SharedDLLs";       Paths=@("HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\SharedDLLs", "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\SharedDLLs")}
+    @{Name="Uninstall";        Paths=@("HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall", "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")}
+    @{Name="CLSID_TypeLib";    Paths=@("HKCR:\CLSID", "HKCR:\TypeLib")}
+    @{Name="Fonts";            Paths=@("HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts")}
+    @{Name="Startup";          Paths=@("HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run", "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run", "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce")}
+    @{Name="ContextMenu";      Paths=@("HKCR:\*\shellex\ContextMenuHandlers", "HKCR:\Directory\shellex")}
+)
+
+foreach ($cat in $ScanCategories) {
+    $Count = 0
+    Write-Host "Scanning $($cat.Name) ..." -NoNewline
     
-    foreach ($path in $cat.Paths) {
-        if (Test-Path "Registry::$path") {
-            try {
-                $keys = Get-ChildItem "Registry::$path" -Recurse -ErrorAction SilentlyContinue -Depth 5
-                
-                foreach ($key in $keys) {
-                    $issue = $null
+    foreach ($regPath in $cat.Paths) {
+        if (Test-Path $regPath) {
+            $items = Get-ChildItem $regPath -Recurse -ErrorAction SilentlyContinue -Depth 4
+            
+            foreach ($item in $items) {
+                $issue = $null
+                try {
+                    # .NET RegistryKey objektum
+                    $key = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($item.PSPath.Replace("Microsoft.PowerShell.Core\Registry::HKEY_LOCAL_MACHINE\",""), $false)
+                    if (-not $key) { $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey($item.PSPath.Replace("Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\",""), $false) }
                     
-                    # .NET alapu erteklekerdezes (stabilabb)
-                    $valueData = $key.GetValue($null)
-                    
-                    if ($cat.Name -eq "SharedDLLs" -and $valueData -and -not (Test-Path $valueData)) {
-                        $issue = "Hianyzo DLL: $valueData"
-                    }
-                    elseif ($cat.Name -eq "UninstallEntries") {
-                        $displayName = $key.GetValue("DisplayName")
-                        $installLoc = $key.GetValue("InstallLocation")
-                        if (-not $installLoc) { $installLoc = $key.GetValue("UninstallString") }
-                        
-                        if ($displayName -and $installLoc) {
-                            $cleanPath = ($installLoc -replace '"','' -replace '%SystemRoot%', $env:SystemRoot)
-                            if (-not (Test-Path $cleanPath)) {
-                                $issue = "Arva telepites: $displayName"
+                    if ($key) {
+                        if ($cat.Name -eq "SharedDLLs") {
+                            $value = $key.GetValue($null)
+                            if ($value -and -not (Test-Path $value)) {
+                                $issue = "Hianyzo DLL: $value"
                             }
                         }
-                    }
-                    elseif ($cat.Name -eq "Fonts" -and $valueData -and -not (Test-Path "$env:SystemRoot\Fonts\$valueData")) {
-                        $issue = "Hianyzo font: $valueData"
-                    }
-                    elseif ($cat.Name -eq "StartupPrograms" -and $valueData) {
-                        $exePath = ($valueData -split ' ')[0] -replace '"',''
-                        if (-not (Test-Path $exePath)) { 
-                            $issue = "Hianyzo startup exe: $exePath" 
+                        elseif ($cat.Name -eq "Uninstall") {
+                            $dispName = $key.GetValue("DisplayName")
+                            $uninstStr = $key.GetValue("UninstallString")
+                            if ($dispName -and $uninstStr) {
+                                $exe = ($uninstStr -replace '"','' -split ' ')[0]
+                                if (-not (Test-Path $exe)) {
+                                    $issue = "Arva uninstall: $dispName"
+                                }
+                            }
                         }
+                        # További kategóriák finomhangolása...
                     }
-                    
-                    if ($issue) {
-                        $AllIssues += [PSCustomObject]@{
-                            Category   = $cat.Name
-                            Issue      = $issue
-                            Path       = $key.PSPath
-                            SafeToRemove = $true   # kesobb whitelist alapjan finomhangolhato
-                        }
-                        $IssuesInCat++
+                    if ($key) { $key.Close() }
+                }
+                catch {}
+                
+                if ($issue) {
+                    $AllIssues += [PSCustomObject]@{
+                        Category     = $cat.Name
+                        Issue        = $issue
+                        Path         = $item.PSPath
+                        SafeToRemove = $true
                     }
+                    $Count++
                 }
             }
-            catch { }
         }
     }
-    Write-Host " -> $($IssuesInCat) problema" -ForegroundColor Gray
+    Write-Host " -> $Count talalat" -ForegroundColor Gray
 }
 
-$Total = $AllIssues.Count
-Write-Host "`nSCAN KESZ! Osszes talalt problema: $Total db" -ForegroundColor Green
-
-$AllIssues | ConvertTo-Json -Depth 8 | Out-File $JsonFile -Encoding UTF8
+$AllIssues | ConvertTo-Json -Depth 10 | Out-File $JsonFile -Encoding UTF8
+Write-Host "`nSCAN KESZ! Osszes talalat: $($AllIssues.Count) db" -ForegroundColor Green
 Write-Host "Eredmeny mentve: $JsonFile" -ForegroundColor Green
-Write-Host "Backup fajlok a Temp mappaban" -ForegroundColor Yellow
