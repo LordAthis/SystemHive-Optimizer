@@ -5,7 +5,7 @@ if (-not (Test-Path $ProjectTemp)) { New-Item -Path $ProjectTemp -ItemType Direc
 
 param([int]$Cycles = 50)  # hány „éves” telepítés/törlés szimuláljunk
 
-Write-Host "🚀 Registry bloat szimuláció indítása ($Cycles ciklus)..."
+Write-Host "🚀 Registry bloat szimuláció indítasa ($Cycles ciklus)..."
 
 for ($i = 1; $i -le $Cycles; $i++) {
     # 1. Telepítünk 10-15 random programot (choco vagy winget)
