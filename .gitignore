@@ -10,7 +10,12 @@ ScanResults.json
 /temp
 /LOG
 /log
+/Logs
+*.log
 
 
 # Log fájlok
 RescueCenter log
+
+# Mentett Gép-Specifikus adatok
+Backup_*.reg
