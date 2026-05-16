@@ -15,8 +15,8 @@ if (-not (Test-Admin)) {
 }
 
 # Saját Tmp mappa a projekt gyokerében
-$TmpDir = Join-Path $PSScriptRoot "Tmp"
-if (-not (Test-Path $TmpDir)) { New-Item -Path $TmpDir -ItemType Directory -Force | Out-Null }
+$ProjectTemp = Join-Path $PSScriptRoot "Temp"
+if (-not (Test-Path $ProjectTemp)) { New-Item -Path $ProjectTemp -ItemType Directory -Force }
 
 $JsonFile = Join-Path $TmpDir "ScanResults.json"
 $BackupHKLM = Join-Path $TmpDir "Backup_HKLM.reg"
