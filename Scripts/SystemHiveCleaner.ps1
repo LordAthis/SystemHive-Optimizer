@@ -16,7 +16,9 @@ if (-not (Test-Admin)) {
     exit
 }
 
-$LogFile = "$env:TEMP\SystemHiveScanner_$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+$ProjectTemp = Join-Path $PSScriptRoot "Temp"
+if (-not (Test-Path $ProjectTemp)) { New-Item -Path $ProjectTemp -ItemType Directory -Force
+}
 $JsonFile = "$env:TEMP\ScanResults.json"
 
 Write-Host "SystemHive Optimizer - SCANNER inditasa (melyitett scan)..." -ForegroundColor Green
