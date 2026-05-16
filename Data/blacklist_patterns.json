@@ -1,9 +1,24 @@
 {
-  "Comments": "Extra mintak, amiket mindig jeloljunk problemasnak",
+  "Version": "0.5",
+  "LastUpdated": "2026-05-16",
+  "Description": "Extra mintak, amiket mindig problemasnak jelolunk (meg whitelist eseten is)",
   "Patterns": [
     "*Temp*",
     "*Crash*",
+    "*Backup*",
     "*Old*",
-    "*Backup*"
+    "*Fake*",
+    "*Trial*",
+    "*Crack*",
+    "*Keygen*",
+    "*Optimizer*",
+    "*Booster*",
+    "*Cleaner*",
+    "*TuneUp*",
+    "*PCFix*"
+  ],
+  "AggressivePatterns": [
+    "*{*}{*}",
+    "*CLSID*\\{*"
   ]
 }
