@@ -1,21 +1,22 @@
 # Kihagyni való fájlok és mappák
 
-# Automatikusan az alkalmazások által létrehozott konfigurációs fájlok
+# Eredmények és ideiglenes fájlok
 ScanResults.json
+*.json
+*.log
+*.tmp
+Backup_*.reg
 
-
-# Ideíglenes fájlok tárolására használt mappák
-/TMP
+# Projekt mappák
 /Temp
+/TMP
 /temp
+/Logs
 /LOG
 /log
-/Logs
-*.log
+/Backup
+/Backup_*
 
-
-# Log fájlok
-RescueCenter log
-
-# Mentett Gép-Specifikus adatok
-Backup_*.reg
+# Egyéb
+Thumbs.db
+*.bak
