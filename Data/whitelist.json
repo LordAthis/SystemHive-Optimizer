@@ -1,8 +1,29 @@
 {
-  "Comments": "Ezeket a kulcsokat SOHA ne töröljük",
+  "Version": "0.5",
+  "LastUpdated": "2026-05-16",
+  "Description": "Ezeket a kulcsokat es kategoriakat SOHA ne torolje a Cleaner",
   "ProtectedPaths": [
-    "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
-    "HKLM\\SYSTEM\\CurrentControlSet\\Services",
-    "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders"
+    "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+    "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce",
+    "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+    "HKLM:\\SYSTEM\\CurrentControlSet\\Services",
+    "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList",
+    "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders",
+    "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Microsoft"
+  ],
+  "ProtectedCategories": [
+    "Fonts",
+    "CoreShell",
+    "MicrosoftEdge",
+    "WindowsDefender",
+    "GraphicsDrivers"
+  ],
+  "ProtectedPublishers": [
+    "Microsoft Corporation",
+    "Microsoft",
+    "Google",
+    "NVIDIA",
+    "AMD",
+    "Intel"
   ]
 }
