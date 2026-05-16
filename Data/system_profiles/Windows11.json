@@ -1,0 +1,19 @@
+{
+  "ProfileName": "Windows 11 Pro / Home",
+  "Version": "24H2",
+  "Recommended": true,
+  "SafeCategories": [
+    "SharedDLLs",
+    "Uninstall",
+    "CLSID_TypeLib",
+    "ContextMenu",
+    "MuiCache",
+    "UserAssist"
+  ],
+  "AggressiveCategories": [
+    "Fonts",
+    "History_MRU",
+    "AppPaths"
+  ],
+  "Notes": "Windows 11 eseten ovatosabbnak kell lenni a Modern Apps es Edge bejegyzesekkel."
+}
