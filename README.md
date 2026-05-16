@@ -27,21 +27,21 @@ Verzió: **0.5** (2026.05)
 ---
 ## Könyvtárstruktúra
 
-SystemHive-Optimizer/
-   ├── Launcher.ps1
-   ├── Scripts/
-   │   ├── Scanner.ps1
-   │   ├── Cleaner.ps1
-   │   └── BloatSimulator.ps1
-   ├── Data/
-   │   ├── whitelist.json
-   │   ├── blacklist_patterns.json
-   │   └── system_profiles/
-   ├── Temp/
-   ├── Logs/
-   ├── Backup/
-   ├── README.md
-   └── .gitignore
+- **SystemHive-Optimizer/**
+  - **Launcher.ps1** ← Fő indító
+  - **Scripts/**
+    - Scanner.ps1
+    - Cleaner.ps1
+    - BloatSimulator.ps1
+  - **Data/**
+    - whitelist.json
+    - blacklist_patterns.json
+    - system_profiles/
+  - **Temp/**
+  - **Logs/** ← Futási naplók
+  - **Backup/**
+  - **README.md**
+  - **.gitignore**
 
 
 ---
